@@ -8,6 +8,8 @@ package com.yongzhiai.core.node;
  * @Version 1.0
  **/
 
+import java.util.Objects;
+
 /**
  * 存储节点地址信息
  */
@@ -46,5 +48,19 @@ public class Endpoint {
                 "host='" + host + '\'' +
                 ", port=" + port +
                 '}';
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Endpoint endpoint = (Endpoint) o;
+        return getPort() == endpoint.getPort() && Objects.equals(getHost(), endpoint.getHost());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getHost(), getPort());
     }
 }

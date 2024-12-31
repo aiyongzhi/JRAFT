@@ -10,13 +10,12 @@ package com.yongzhiai.core.node;
 
 import com.yongzhiai.core.command.Command;
 import com.yongzhiai.core.command.CommandHandler;
-import com.yongzhiai.core.command.CommandRegistry;
+import com.yongzhiai.core.command.CommandHandlerRegistry;
 import com.yongzhiai.core.log.LogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -45,7 +44,7 @@ public class ClusterNode {
     /**
      * 从节点集合
      */
-    private final List<Endpoint> slaves=new ArrayList<>();
+    private final HashSet<Endpoint> slaves;
 
 
     /**
@@ -58,14 +57,25 @@ public class ClusterNode {
      * 指令注册表
      * 根据指令编码查找对应的指令处理函数
      */
-    private CommandRegistry commandRegistry;
+    private CommandHandlerRegistry commandRegistry;
 
 
-    public ClusterNode(Endpoint endpoint, Endpoint master, NodeState state, CommandRegistry commandRegistry) {
+    public ClusterNode(Endpoint endpoint, Endpoint master, NodeState state, HashSet<Endpoint> slaves, CommandHandlerRegistry commandRegistry) {
+        this.endpoint = endpoint;
+        this.master = master;
+        this.state = state;
+        this.slaves = slaves;
+        this.commandRegistry = commandRegistry;
+    }
+
+
+    public ClusterNode(Endpoint endpoint, Endpoint master, NodeState state, CommandHandlerRegistry commandRegistry) {
         this.endpoint = endpoint;
         this.master = master;
         this.state = state;
         this.commandRegistry = commandRegistry;
+
+        this.slaves=new HashSet<>();
     }
 
     /**
@@ -119,6 +129,7 @@ public class ClusterNode {
     private void doSendCommandToSlave(Endpoint slave,LogEntry logEntry){
         LOG.info("发送指令给从节点:{},指令编码:{},复制偏移量:{}",slave,logEntry.getCommand().getCode(),
                 logEntry.getOffset());
+
     }
 
 
@@ -132,6 +143,16 @@ public class ClusterNode {
         if(this.state!=NodeState.SLAVE){
             throw new IllegalArgumentException("只有从节点才能接受指令");
         }
+
+        long localOffset = this.getOffset().get();
+
+        if(logEntry.getOffset()<=localOffset){
+            LOG.error("已过期的日志条目,编号:{},指令编码:{}",logEntry.getOffset(),
+                    logEntry.getCommand().getCode());
+
+            return null;
+        }
+
         //1. 获取指令处理函数
         CommandHandler commandHandler = getCommandRegistry().getHandler(logEntry.getCommand().getCode());
         //2. 执行指令处理函数
@@ -171,7 +192,7 @@ public class ClusterNode {
         this.state = state;
     }
 
-    public List<Endpoint> getSlaves() {
+    public HashSet<Endpoint> getSlaves() {
         return slaves;
     }
 
@@ -185,11 +206,16 @@ public class ClusterNode {
     }
 
 
-    public CommandRegistry getCommandRegistry() {
+    public CommandHandlerRegistry getCommandRegistry() {
         return commandRegistry;
     }
 
-    public void setCommandRegistry(CommandRegistry commandRegistry) {
+    public void setCommandRegistry(CommandHandlerRegistry commandRegistry) {
         this.commandRegistry = commandRegistry;
+    }
+
+
+    public void addSalve(Endpoint endpoint){
+        this.slaves.add(endpoint);
     }
 }

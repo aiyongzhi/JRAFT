@@ -7,7 +7,7 @@ package com.yongzhiai.core.command;
  * @Date 2024/12/23 15:52
  * @Version 1.0
  **/
-public interface CommandRegistry {
+public interface CommandHandlerRegistry {
 
         //注册指令
         public void register(int code,CommandHandler handler);
