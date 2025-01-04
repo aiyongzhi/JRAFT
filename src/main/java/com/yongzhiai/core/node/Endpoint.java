@@ -8,12 +8,18 @@ package com.yongzhiai.core.node;
  * @Version 1.0
  **/
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.net.Inet4Address;
 import java.util.Objects;
 
 /**
  * 存储节点地址信息
  */
-public class Endpoint {
+public class Endpoint implements Serializable{
+
+    @Serial
+    private static final long serialVersionUID= -1966439963457344854L;
     private String host;
     private int port;
 
@@ -63,4 +69,6 @@ public class Endpoint {
     public int hashCode() {
         return Objects.hash(getHost(), getPort());
     }
+
+
 }

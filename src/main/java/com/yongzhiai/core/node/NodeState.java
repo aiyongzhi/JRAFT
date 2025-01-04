@@ -14,5 +14,24 @@ package com.yongzhiai.core.node;
  *
  */
 public enum NodeState {
-    MASTER,SLAVE
+    //领导者
+    LEADER,
+    //候选者
+    CANDIDATE,
+    //跟随者
+    FOLLOWER,
+    //节点出现错误
+    ERROR,
+    //未初始化
+    UNINITIALIZED,
+    //节点正在停止工作
+    SHUTTING,
+    //节点停止服务
+    SHUTDOWN;
+
+
+    public boolean isActive(){
+        return this.ordinal()<NodeState.ERROR.ordinal();
+    }
+
 }
