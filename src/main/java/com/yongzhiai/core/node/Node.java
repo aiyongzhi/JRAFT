@@ -11,6 +11,8 @@ package com.yongzhiai.core.node;
 import com.yongzhiai.core.config.ConfigurationSnapshot;
 import com.yongzhiai.core.node.lifecycle.Lifecycle;
 import com.yongzhiai.election.VoteInfo;
+import com.yongzhiai.factory.JRaftServiceFactory;
+import com.yongzhiai.metadata.RaftMetaStorage;
 
 /**
  * Node接口在Raft算法中是节点的抽象
@@ -68,4 +70,16 @@ public interface Node extends Lifecycle<NodeOptions> {
 
 
     public VoteInfo getVoteInfo();
+
+    /**
+     * 获取jraft服务工厂
+     * @return
+     */
+    public JRaftServiceFactory getServiceFactory();
+
+    /**
+     * 获取节点元数据存储器
+     * @return
+     */
+    public RaftMetaStorage getRaftMetaStorage();
 }

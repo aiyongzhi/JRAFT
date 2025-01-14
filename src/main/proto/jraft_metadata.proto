@@ -1,0 +1,72 @@
+syntax ="proto3";//版本设定
+option java_multiple_files=false;//生成一个类还是多个类
+option java_package="com.yongzhiai.proto";//生成Java从类的包名
+option java_outer_classname="JRaftMetadataProto";
+
+/**
+节点网络通信地址信息
+ */
+message Endpoint{
+  //当前节点
+  string host=1;
+
+  //当前节点的端口号
+  int32 port=5;
+}
+
+
+/**
+用于区分同一个进程启动的多个Node节点
+通过不同的idx来区分
+ */
+message NodeId{
+  //节点的ID
+  int32 idx=1;
+
+  //当前节点所属的集群名称
+  string group_name=4;
+}
+
+/**
+节点的信息
+ */
+message PeerId{
+
+  /**
+  地址信息
+   */
+  Endpoint endpoint=1;
+
+  /**
+  进程中当前节点的编号
+   */
+  NodeId node_id=3;
+
+  /**
+  当前节点所属的集群名称
+   */
+  string group_name=5;
+
+  /**
+  当前节点的选举优先级
+   */
+  int32 election_priority=7;
+}
+
+/**
+节点的元数据信息
+
+存储当前节点在哪个任期中，给哪个节点投过票
+ */
+message JRaftMetadata{
+  /**
+  当前节点的任期
+   */
+  int64 term=1;
+
+  /**
+  当前任期中投过票的节点
+   */
+  PeerId peer_id=3;
+
+}

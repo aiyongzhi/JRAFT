@@ -4,6 +4,9 @@ import cn.hutool.core.util.StrUtil;
 import com.yongzhiai.core.config.ConfigurationSnapshot;
 import com.yongzhiai.core.node.*;
 import com.yongzhiai.election.VoteInfo;
+import com.yongzhiai.factory.JRaftServiceFactory;
+import com.yongzhiai.metadata.RaftMetaStorage;
+import com.yongzhiai.metadata.RaftMetaStorageOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +84,16 @@ public class NodeImpl implements Node, Serializable {
 
     private VoteInfo voteInfo;
 
+    /**
+     * jraft服务工厂
+     */
+    private JRaftServiceFactory serviceFactory;
+
+    /**
+     * jraft的元数据存储器
+     */
+    private RaftMetaStorage raftMetaStorage;
+
 
 
 
@@ -113,8 +126,18 @@ public class NodeImpl implements Node, Serializable {
                 ConfigurationSnapshot configurationSnapshot=new ConfigurationSnapshot(nodeOptions.getInitialConf());
                 setConf(configurationSnapshot);
 
+                //设置当前节点的组件服务工厂
+                setServiceFactory(nodeOptions.getRaftServiceFactory());
+
                 //TODO: 这里后续需要改成从磁盘元数据持久化目录读取当前节点投票元数据信息
-                setVoteInfo(new VoteInfo());
+                //设置当前节点的元数据存储器
+                setRaftMetaStorage(getServiceFactory().createRaftMetaStorage(getRaftMetaPath(),this));
+
+                //完成元数据存储器的初始化
+                getRaftMetaStorage().initialize(new RaftMetaStorageOptions());
+
+                //设置当前节点的投票信息
+                setVoteInfo(getRaftMetaStorage().getMetadata().getVoteInfo());
 
                 //变更节点的状态为跟随着
                 setState(NodeState.FOLLOWER);
@@ -239,6 +262,24 @@ public class NodeImpl implements Node, Serializable {
     @Override
     public VoteInfo getVoteInfo() {
         return this.voteInfo;
+    }
+
+    @Override
+    public JRaftServiceFactory getServiceFactory() {
+        return this.serviceFactory;
+    }
+
+    @Override
+    public RaftMetaStorage getRaftMetaStorage() {
+        return this.raftMetaStorage;
+    }
+
+    public void setServiceFactory(JRaftServiceFactory serviceFactory) {
+        this.serviceFactory = serviceFactory;
+    }
+
+    public void setRaftMetaStorage(RaftMetaStorage raftMetaStorage) {
+        this.raftMetaStorage = raftMetaStorage;
     }
 
     public void setVoteInfo(VoteInfo voteInfo) {

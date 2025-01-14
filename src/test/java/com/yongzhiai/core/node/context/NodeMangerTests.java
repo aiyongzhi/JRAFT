@@ -80,7 +80,7 @@ public class NodeMangerTests {
         Set<Node> nodeSet = nodeManger.getRaftGroupNodeSet(groupName);
 
         for (Node node : nodeSet) {
-            System.out.println(node);
+            System.out.println(node.getPeerId());
             System.out.println("-----------------------------");
         }
 

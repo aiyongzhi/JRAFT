@@ -10,6 +10,8 @@ package com.yongzhiai.core.node;
 
 import cn.hutool.core.util.StrUtil;
 import com.yongzhiai.core.config.Configuration;
+import com.yongzhiai.factory.JRaftServiceFactory;
+import com.yongzhiai.factory.impl.DefaultJRaftServiceFactory;
 
 /**
  * 节点的配置选项
@@ -44,6 +46,9 @@ public class NodeOptions {
     private final Configuration initialConf;
 
 
+    private JRaftServiceFactory raftServiceFactory;
+
+
     public NodeOptions(final String logPath,final String raftMetaPath,final int electionTimeoutMills,final Configuration initialConf) {
         if(StrUtil.isBlank(logPath) || StrUtil.isBlank(raftMetaPath) || initialConf==null ||
         initialConf.getPeers().isEmpty()){
@@ -54,6 +59,10 @@ public class NodeOptions {
         this.raftMetaPath = raftMetaPath;
         this.electionTimeoutMills = electionTimeoutMills;
         this.initialConf = initialConf;
+
+
+        //创建默认的raft服务工厂
+        setRaftServiceFactory(DefaultJRaftServiceFactory.newInstance());
     }
 
 
@@ -74,5 +83,14 @@ public class NodeOptions {
 
     public Configuration getInitialConf() {
         return initialConf;
+    }
+
+
+    public JRaftServiceFactory getRaftServiceFactory() {
+        return raftServiceFactory;
+    }
+
+    public void setRaftServiceFactory(JRaftServiceFactory raftServiceFactory) {
+        this.raftServiceFactory = raftServiceFactory;
     }
 }
